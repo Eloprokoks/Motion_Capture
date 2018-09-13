@@ -1,12 +1,16 @@
 <?php
-    try {
-        $dbh = new PDO("mysql:host=localhost;dbname=bvh_test", 'root', '');
-        foreach($dbh->query('SELECT * from joints') as $row) {
-            print_r($row);
-        }
-        $dbh = null;
-    } catch (PDOException $e) {
-        print "Error!: " . $e->getMessage() . "<br/>";
-        die();
-    }
+    
+    function connect() {
+        require "config.php";  // include 
+        $dbh=null;  //PDO object 
+        try {
+            $dbh = new PDO("mysql:host=".$host.";dbname=".$dbname,$user,$pass);
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage() . "<br/>";
+            die();
+        } 
+        return $dbh;
+    } 
+    
+    $dbh2=connect();
 ?>
