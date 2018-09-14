@@ -1,33 +1,39 @@
 <?php 
 // 7 przerwarzanie pliku BVH
 require "joint.php";
+require "BVHconsts.php";
 function readBVH($file,$fileSize){
-    require "BVHconsts.php";
-    $hierarchy = 0;
     $joints = array(); //lista 
-    $fileIsCorrect = true;
     $arrayBVH=getBVHArray($file,$fileSize);
-   //9 sprawdzenie poprawności pliku
-    foreach($arrayBVH as $e){
-        if($e==$braceLeft)
-            {
-                $hierarchy++;
-                echo $hierarchy." ";                
-            }
-        elseif($e==$braceRight)
-        {
-            $hierarchy--;
-            echo $hierarchy." ";
-        }
-    }
+    global $hierarchy,$root;
+    $fileIsCorrect=checkHierarchy($arrayBVH) && areEqual($arrayBVH[0],$hierarchy) && areEqual($arrayBVH[1],$root);
+    if($fileIsCorrect){echo "plik BVH jest poprawny";}
+    else echo "plik BVH jest niepoprawny"; 
   }
 
     //8 przetworzenie pliku na listę 
-  function getBVHArray($file,$fileSize){   //lista 
-    $stringContent=fread($file,$fileSize);
-    $stringNoWS = preg_replace('/\s+/', '#', $stringContent);   // tekst bez białych znaków (WS)
-    return explode("#",$stringNoWS);
+    function getBVHArray($file,$fileSize){   //lista 
+        $stringContent=fread($file,$fileSize);
+        $stringNoWS = preg_replace('/\s+/', '#', $stringContent);   // tekst bez białych znaków (WS)
+        return explode("#",$stringNoWS);
     }
 
+    //9 sprawdzenie poprawności pliku
+    function checkHierarchy($arrayBVH){
+        foreach($arrayBVH as $arrayElement){
+            $hierarchy=0;
+            global $braceLeft,$braceRight;
+            if(areEqual($arrayElement,$braceLeft))
+                $hierarchy++;              
+            elseif(areEqual($arrayElement,$braceRight)) 
+                $hierarchy--;
+        }
+        return $hierarchy==0;
+    }
+
+    //10 funkcja pomocnicza porónójąca elementy w liście
+    function areEqual($arrayElement,$itemCompared){
+        return strcmp($arrayElement,$itemCompared)==0;
+    }
 
 ?>
