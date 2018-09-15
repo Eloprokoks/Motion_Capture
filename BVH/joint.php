@@ -8,8 +8,11 @@ class Joint{
     public $numberchannel = 0;
     public $channels; 
     
-    function __construct($newName){
+    function __construct($newName,$newOffsetX,$newOffsetY,$newOffsetZ){
         $this->name=$newName;
+        $this->offsetX=$newOffsetX;
+        $this->offsetY=$newOffsetY;
+        $this->offsetZ=$newOffsetZ;
     }
 }
 ?>

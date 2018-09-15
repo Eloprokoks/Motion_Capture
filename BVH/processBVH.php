@@ -5,9 +5,16 @@ require "BVHconsts.php";
 function readBVH($file,$fileSize){
     $joints = array(); //lista 
     $arrayBVH=getBVHArray($file,$fileSize);
-    global $hierarchy,$root;
+    global $hierarchy,$root,$braceLeft,$offset;
     $fileIsCorrect=checkHierarchy($arrayBVH) && areEqual($arrayBVH[0],$hierarchy) && areEqual($arrayBVH[1],$root);
-    if($fileIsCorrect){echo "plik BVH jest poprawny";}
+    if($fileIsCorrect){
+        echo "plik BVH jest poprawny";
+        $fileIsCorrect=areEqual($arrayBVH[3],$braceLeft)&&areEqual($arrayBVH[4],$offset);
+        if($fileIsCorrect){
+            $newJoint=new Joint($arrayBVH[2],$arrayBVH[5],$arrayBVH[6],$arrayBVH[7]);
+            print_r($newJoint);
+        }
+    }
     else echo "plik BVH jest niepoprawny"; 
   }
 
@@ -31,9 +38,12 @@ function readBVH($file,$fileSize){
         return $hierarchy==0;
     }
 
-    //10 funkcja pomocnicza porónójąca elementy w liście
+    //10 funkcja pomocnicza porównująca elementy w liście
     function areEqual($arrayElement,$itemCompared){
         return strcmp($arrayElement,$itemCompared)==0;
     }
+
+
+
 
 ?>
