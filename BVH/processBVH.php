@@ -5,14 +5,23 @@ require "BVHconsts.php";
 function readBVH($file,$fileSize){
     $joints = array(); //lista 
     $arrayBVH=getBVHArray($file,$fileSize);
-    global $hierarchy,$root,$braceLeft,$offset;
+    global $hierarchy,$root,$braceLeft,$offset,$channels,$numberOfChannels;
     $fileIsCorrect=checkHierarchy($arrayBVH) && areEqual($arrayBVH[0],$hierarchy) && areEqual($arrayBVH[1],$root);
     if($fileIsCorrect){
         echo "plik BVH jest poprawny";
         $fileIsCorrect=areEqual($arrayBVH[3],$braceLeft)&&areEqual($arrayBVH[4],$offset);
         if($fileIsCorrect){
             $newJoint=new Joint($arrayBVH[2],$arrayBVH[5],$arrayBVH[6],$arrayBVH[7]);
-            print_r($newJoint);
+            $fileIsCorrect=areEqual($arrayBVH[8],$channels);
+            if($fileIsCorrect){
+                $numberOfChannels=(int)$arrayBVH[9];
+                $newJoint->setNumberOfChannels($numberOfChannels);
+                for ($i=0; $i <$numberOfChannels; $i++) { 
+                   $newJoint->channels[$arrayBVH[10+$i]]=array();
+
+                }
+                print_r($newJoint);
+            }
         }
     }
     else echo "plik BVH jest niepoprawny"; 
