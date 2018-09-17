@@ -7,7 +7,7 @@ $framesNumber;
 $frameTimeNumber;
 function readBVH($file, $fileSize)
 {
-    global $hierarchy, $root, $joints,$framesNumber,$frameTimeNumber;
+    global $hierarchy, $root, $joints, $framesNumber, $frameTimeNumber;
     $arrayBVH = getBVHArray($file, $fileSize);
     $fileIsCorrect = checkHierarchy($arrayBVH) && areEqual($arrayBVH[0], $hierarchy) && areEqual($arrayBVH[1], $root);
     if ($fileIsCorrect) {
@@ -16,8 +16,9 @@ function readBVH($file, $fileSize)
         //         echo '</pre>';;
         //start recursion, 2 = "Hips"
         $i = checkFile($arrayBVH, 2);
-        $i= setFramesAndFrameTime($arrayBVH,$i);
-        echo$framesNumber." ".$frameTimeNumber;
+        $i = setFramesAndFrameTime($arrayBVH, $i);
+        // echo$framesNumber." ".$frameTimeNumber;
+        fillJointsWithData($arrayBVH, $i);
         echo '<pre>';
         print_r($joints);
         echo '</pre>';
@@ -66,7 +67,7 @@ function checkFile($arrayBVH, $i)
     //trafiono na MOTION, $i-1 to pozycja słowa przed nazwą jointa
     if (areEqual($arrayBVH[$i - 1], $motion)) {
         echo "KONIEC TEJ STRUKTURY";
-       
+
     } else {
         // /$i += 2;
         // if ($fileIsCorrect) {
@@ -149,4 +150,24 @@ function setFramesAndFrameTime($arrayBVH, $i)
     $frameTimeNumber = (float) $arrayBVH[$i + 4];
     $i += 4;
     return $i;
+}
+
+function fillJointsWithData($arrayBVH, $i)
+{
+    $i += 1;
+    $arraySize = count($arrayBVH);
+    global $joints;
+    $k = 0; //pozycja w tablicy liczona od 0 tam gdzie zaczynają się numery
+    $l = 0; // licznik po channelach
+    for ($j = $i; $j < $arraySize; $j += $l) {
+        $l = 0;
+        foreach ($joints[$k % count($joints)]->channels as $key => $channel) {
+            if (isset($arrayBVH[$j + $l]) && $arrayBVH[$j + $l]) {
+                array_push($joints[$k % count($joints)]->channels[$key], $arrayBVH[$j + $l]);
+
+            }
+            $l++;
+        }
+        $k++;
+    }
 }
