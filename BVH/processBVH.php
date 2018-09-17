@@ -3,10 +3,11 @@
 require "joint.php";
 require "BVHconsts.php";
 $joints = array(); //lista
-
+$framesNumber;
+$frameTimeNumber;
 function readBVH($file, $fileSize)
 {
-    global $hierarchy, $root, $joints;
+    global $hierarchy, $root, $joints,$framesNumber,$frameTimeNumber;
     $arrayBVH = getBVHArray($file, $fileSize);
     $fileIsCorrect = checkHierarchy($arrayBVH) && areEqual($arrayBVH[0], $hierarchy) && areEqual($arrayBVH[1], $root);
     if ($fileIsCorrect) {
@@ -14,8 +15,9 @@ function readBVH($file, $fileSize)
         //         print_r($arrayBVH);
         //         echo '</pre>';;
         //start recursion, 2 = "Hips"
-        checkFile($arrayBVH, 2);
-
+        $i = checkFile($arrayBVH, 2);
+        $i= setFramesAndFrameTime($arrayBVH,$i);
+        echo$framesNumber." ".$frameTimeNumber;
         echo '<pre>';
         print_r($joints);
         echo '</pre>';
@@ -64,6 +66,7 @@ function checkFile($arrayBVH, $i)
     //trafiono na MOTION, $i-1 to pozycja słowa przed nazwą jointa
     if (areEqual($arrayBVH[$i - 1], $motion)) {
         echo "KONIEC TEJ STRUKTURY";
+       
     } else {
         // /$i += 2;
         // if ($fileIsCorrect) {
@@ -79,14 +82,13 @@ function checkFile($arrayBVH, $i)
                 $i += $newJoint->numberOfChannels + 2;
             }
             //po channelach sprawdzamy czy jest Joint, End site lub "}"
-            $i = setBraceRight($arrayBVH, $i);
             array_push($joints, $jointWithChannels);
+            $i = setBraceRight($arrayBVH, $i);
 
         } else {
             $i = setBraceRight($arrayBVH, $i);
         }
-
-        $i += checkFile($arrayBVH, $i + 2);
+        $i = checkFile($arrayBVH, $i + 2);
     }
     return $i;
 }
@@ -115,12 +117,13 @@ function checkChannels($newJoint, $arrayBVH, $i)
 }
 
 function setBraceRight($arrayBVH, $i)
-{global $braceRight, $end;
+{
+    global $braceRight, $end;
     if (areEqual($arrayBVH[$i + 1], $braceRight)) {
         $i = checkBraceRight($arrayBVH, $braceRight, $i);
 
     } elseif (areEqual($arrayBVH[$i + 1], $end)) {
-       setEnd($arrayBVH,$i);
+        setEnd($arrayBVH, $i);
         $i = checkBraceRight($arrayBVH, $braceRight, $i);
     }
     return $i;
@@ -134,5 +137,16 @@ function setEnd($arrayBVH, $i)
     $newJoint = new Joint("End Site " . $i, $arrayBVH[$i + 3], $arrayBVH[$i + 4], $arrayBVH[$i + 5]);
     $i += 5;
     array_push($joints, $newJoint);
+    return $i;
+}
+
+function setFramesAndFrameTime($arrayBVH, $i)
+{
+    global $frames, $frame, $time, $framesNumber, $frameTimeNumber;
+    $fileIsCorrect = areEqual($arrayBVH[$i], $frames);
+    $framesNumber = (int) $arrayBVH[$i + 1];
+    $fileIsCorrect = areEqual($arrayBVH[$i + 2], $frame) && areEqual($arrayBVH[$i + 3], $time);
+    $frameTimeNumber = (float) $arrayBVH[$i + 4];
+    $i += 4;
     return $i;
 }
