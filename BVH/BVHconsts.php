@@ -7,6 +7,7 @@
     $offset = "OFFSET";
     $channels = "CHANNELS";
     $joint = "JOINT";
-    $endSite = "End"; 
+    $end = "End"; 
+    $site= "Site";
     $motion = "MOTION";
 ?>

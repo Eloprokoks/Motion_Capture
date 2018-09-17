@@ -3,13 +3,19 @@
 require "joint.php";
 require "BVHconsts.php";
 $joints = array(); //lista
+
 function readBVH($file, $fileSize)
 {
     global $hierarchy, $root, $joints;
     $arrayBVH = getBVHArray($file, $fileSize);
     $fileIsCorrect = checkHierarchy($arrayBVH) && areEqual($arrayBVH[0], $hierarchy) && areEqual($arrayBVH[1], $root);
     if ($fileIsCorrect) {
+// echo '<pre>';
+        //         print_r($arrayBVH);
+        //         echo '</pre>';;
+        //start recursion, 2 = "Hips"
         checkFile($arrayBVH, 2);
+
         echo '<pre>';
         print_r($joints);
         echo '</pre>';
@@ -51,17 +57,20 @@ function areEqual($arrayElement, $itemCompared)
 
 function checkFile($arrayBVH, $i)
 {
-    global $braceLeft, $braceRight, $channels, $offset, $joints, $joint, $endSite, $motion;
-    $fileIsCorrect = areEqual($arrayBVH[$i + 1], $braceLeft) && areEqual($arrayBVH[$i + 2], $offset);
-    $fileIsEnd = areEqual($arrayBVH[$i - 1], $motion);
-    $nextWordIsBraceRight =areEqual($arrayBVH[$i+1],$braceRight);
-    echo $nextWordIsBraceRight;
-    $i += 2;
-    if (!$fileIsEnd) {
+    global $braceLeft, $braceRight, $channels, $offset, $joints, $joint, $end, $motion, $root;
 
-        if ($fileIsCorrect) {
-            $newJoint = new Joint($arrayBVH[$i - 2], $arrayBVH[$i + 1], $arrayBVH[$i + 2], $arrayBVH[$i + 3]);
-            $i += 3;
+    // $fileIsCorrect = areEqual($arrayBVH[$i + 1], $braceLeft) && areEqual($arrayBVH[$i + 2], $offset);
+
+    //trafiono na MOTION, $i-1 to pozycja słowa przed nazwą jointa
+    if (areEqual($arrayBVH[$i - 1], $motion)) {
+        echo "KONIEC TEJ STRUKTURY";
+    } else {
+        // /$i += 2;
+        // if ($fileIsCorrect) {
+        $nextWord = $arrayBVH[$i - 1];
+        if (areEqual($nextWord, $joint) || areEqual($nextWord, $root)) {
+            $newJoint = new Joint($arrayBVH[$i], $arrayBVH[$i + 3], $arrayBVH[$i + 4], $arrayBVH[$i + 5]);
+            $i += 5;
             //sprawdzamy czy kolejne słowo to channel lub czy jest "}"
             $nextWordIsChannel = areEqual($arrayBVH[$i + 1], $channels);
             //$nextWordIsBraceRight = areEqual($arrayBVH[$i + 1], $braceRight);
@@ -70,39 +79,26 @@ function checkFile($arrayBVH, $i)
                 $i += $newJoint->numberOfChannels + 2;
             }
             //po channelach sprawdzamy czy jest Joint, End site lub "}"
-            $nextWord = $arrayBVH[$i + 1];
+            $i = setBraceRight($arrayBVH, $i);
+            array_push($joints, $jointWithChannels);
 
-            if (areEqual($nextWord, $joint)) {
-                array_push($joints, $jointWithChannels);
-                $i += checkFile($arrayBVH, $i + 2);
-
-            } elseif (areEqual($nextWord, $endSite)) {
-                $i += 6;
-                $jakaszmienna = $braceRight;
-                while ($jakaszmienna == $braceRight) {
-                    $i++;
-                    $jakaszmienna = $arrayBVH[$i + 1];
-                }
-                $i += checkFile($arrayBVH, $i + 2);
-            } elseif (areEqual($nextWord, $braceRight)) {
-                $jakaszmienna = $braceRight;
-                while ($jakaszmienna == $braceRight) {
-                    $i++;
-                    $jakaszmienna = $arrayBVH[$i + 1];
-                }
-                $i += checkFile($arrayBVH, $i + 2);
-        
-            } 
-
-        }else {
-            echo "nie ma { albo offsetu";
+        } else {
+            $i = setBraceRight($arrayBVH, $i);
         }
-    }
-     else {
-        echo "KONIEC TEJ STRUKTURY";
+
+        $i += checkFile($arrayBVH, $i + 2);
     }
     return $i;
+}
 
+function checkBraceRight($arrayBVH, $braceRight, $i)
+{
+    $jakaszmienna = $braceRight;
+    while ($jakaszmienna == $braceRight) {
+        $i++;
+        $jakaszmienna = $arrayBVH[$i + 1];
+    }
+    return $i;
 }
 
 function checkChannels($newJoint, $arrayBVH, $i)
@@ -116,4 +112,27 @@ function checkChannels($newJoint, $arrayBVH, $i)
     }
     return $newJoint;
 
+}
+
+function setBraceRight($arrayBVH, $i)
+{global $braceRight, $end;
+    if (areEqual($arrayBVH[$i + 1], $braceRight)) {
+        $i = checkBraceRight($arrayBVH, $braceRight, $i);
+
+    } elseif (areEqual($arrayBVH[$i + 1], $end)) {
+       setEnd($arrayBVH,$i);
+        $i = checkBraceRight($arrayBVH, $braceRight, $i);
+    }
+    return $i;
+}
+
+function setEnd($arrayBVH, $i)
+{
+    global $site, $joints;
+    $fileIsCorrect = areEqual($arrayBVH[$i + 1], $site);
+    $i += 1;
+    $newJoint = new Joint("End Site " . $i, $arrayBVH[$i + 3], $arrayBVH[$i + 4], $arrayBVH[$i + 5]);
+    $i += 5;
+    array_push($joints, $newJoint);
+    return $i;
 }
