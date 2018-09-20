@@ -4,23 +4,50 @@ require "database.php";
 class Saver
 {
     private $database;
-
+    private $frames;
     public function __construct()
     {
         $this->database = connect();
 
         echo "wywołano konstruktor";
     }
-    public function addChannelToDataBase($channel)
-    {}
+    public function addChannelToDataBase($channels, $jointID, $i)
+    {
+        try {
+            $data = [
+                'X_position' => $channels["Xposition"][$i],
+                'Z_position' => $channels["Zposition"][$i],
+                'Y_position' => $channels["Yposition"][$i],
+                'X_rotation' => $channels["Xrotation"][$i],
+                'Y_rotation' => $channels["Yrotation"][$i],
+                'Z_rotation' => $channels["Zrotation"][$i],
+                "joint_ID" => $jointID,
+            ];
+            $sql = "INSERT INTO channels (X_position,Y_position,Z_position,X_rotation,Y_rotation,Z_rotation,joint_ID)
+            VALUES (:X_position,:Y_position,:Z_position,:X_rotation,:Y_rotation,:Z_rotation,:joint_ID)";
+
+            $stmt = $this->database->prepare($sql);
+            $stmt->execute($data);
+        } catch (PDOException $e) {
+            echo "Failed to get DB handle:s " . $e->getMessage() . "\n";
+            exit;
+        }
+
+    }
     public function addJointsToDataBase($joints)
     {
         $fileID = $this->getFileID();
         foreach ($joints as $joint) {
-            $this->addJointToDataBase($joint,$fileID);
-        }}
+            $this->addJointToDataBase($joint, $fileID);
+            for ($i = 0; $i < $this->frames; $i++) {
+                $this->addChannelToDataBase($joint->channels, $this->getJointID(), $i);
+                # code...
+            }
+        }
+
+    }
     public function addFileToDataBase($fileName, $framesNumber, $frameTimeNumber)
-    {
+    {$this->frames = $framesNumber;
         try {
             $data = [
                 'file_name' => $fileName,
@@ -44,6 +71,12 @@ class Saver
         $fileID = $this->database->query($sql)->fetch()["ID"];
         return $fileID;
 
+    }
+    public function getJointID()
+    {
+        $sql = 'SELECT ID FROM joints WHERE ID=( SELECT max(ID) FROM joints )';
+        $jointID = $this->database->query($sql)->fetch()["ID"];
+        return $jointID;
     }
     public function addJointToDataBase($joint, $fileID)
     {

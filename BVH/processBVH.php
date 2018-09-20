@@ -20,12 +20,14 @@ function readBVH($file, $fileSize, $fileName)
         $i = setFramesAndFrameTime($arrayBVH, $i);
         // echo$framesNumber." ".$frameTimeNumber;
         fillJointsWithData($arrayBVH, $i);
-        // echo '<pre>';
-        // print_r($joints);
-        // echo '</pre>';
+        echo '<pre>';
+        print_r($joints);
+        echo '</pre>';
         $saver = new Saver();
         $saver->addFileToDataBase($fileName, $framesNumber, $frameTimeNumber);
         $saver->addJointsToDataBase($joints);
+
+
     }
    else {
         echo "plik BVH jest niepoprawny";
