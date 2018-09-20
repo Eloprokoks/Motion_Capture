@@ -5,6 +5,8 @@
         $database=null;  //PDO object 
         try {
             $database = new PDO("mysql:host=".$host.";dbname=".$dbname,$user,$pass);
+            $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            echo "połączono z bazą ";
         } catch (PDOException $e) {
             print "Error!: " . $e->getMessage() . "<br/>";
             die();

@@ -6,10 +6,11 @@ require "BVH/processBVH.php";
     $myfile = fopen($bvh, "r") or die("Unable to open file!");
     // print_r(fread($myfile,filesize($bvh)));
     // fclose($myfile);
-    return [$myfile,filesize($bvh)];
+    $fileName=$_FILES['uploaded_file']['name'];
+    return [$myfile,filesize($bvh),$fileName];
   } 
   //6 wywołanie funkcji readFileFromForm, z pliku, zamknięcie
-    [$file,$fileSize]=readFileFromForm();
-    readBVH($file,$fileSize);
+    [$file,$fileSize,$fileName]=readFileFromForm();
+    readBVH($file,$fileSize,$fileName);
     fclose($file);
 ?>

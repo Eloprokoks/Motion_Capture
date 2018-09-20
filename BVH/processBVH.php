@@ -2,10 +2,11 @@
 // 7 przerwarzanie pliku BVH
 require "joint.php";
 require "BVHconsts.php";
+require "addDataToDataBase.php";
 $joints = array(); //lista
 $framesNumber;
 $frameTimeNumber;
-function readBVH($file, $fileSize)
+function readBVH($file, $fileSize, $fileName)
 {
     global $hierarchy, $root, $joints, $framesNumber, $frameTimeNumber;
     $arrayBVH = getBVHArray($file, $fileSize);
@@ -19,10 +20,14 @@ function readBVH($file, $fileSize)
         $i = setFramesAndFrameTime($arrayBVH, $i);
         // echo$framesNumber." ".$frameTimeNumber;
         fillJointsWithData($arrayBVH, $i);
-        echo '<pre>';
-        print_r($joints);
-        echo '</pre>';
-    } else {
+        // echo '<pre>';
+        // print_r($joints);
+        // echo '</pre>';
+        $saver = new Saver();
+        $saver->addFileToDataBase($fileName, $framesNumber, $frameTimeNumber);
+        $saver->addJointsToDataBase($joints);
+    }
+   else {
         echo "plik BVH jest niepoprawny";
     }
 
@@ -164,7 +169,6 @@ function fillJointsWithData($arrayBVH, $i)
         foreach ($joints[$k % count($joints)]->channels as $key => $channel) {
             if (isset($arrayBVH[$j + $l]) && $arrayBVH[$j + $l]) {
                 array_push($joints[$k % count($joints)]->channels[$key], $arrayBVH[$j + $l]);
-
             }
             $l++;
         }
