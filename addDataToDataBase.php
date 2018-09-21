@@ -5,22 +5,25 @@ class Saver
 {
     private $database;
     private $frames;
+
     public function __construct()
     {
         $this->database = connect();
 
         echo "wywołano konstruktor";
     }
+    
     public function addChannelToDataBase($channels, $jointID, $i)
     {
         try {
+
             $data = [
-                'X_position' => $channels["Xposition"][$i],
-                'Z_position' => $channels["Zposition"][$i],
-                'Y_position' => $channels["Yposition"][$i],
-                'X_rotation' => $channels["Xrotation"][$i],
-                'Y_rotation' => $channels["Yrotation"][$i],
-                'Z_rotation' => $channels["Zrotation"][$i],
+                'X_position' => isset($channels["Xposition"]) ? $channels["Xposition"][$i] : null,
+                'Z_position' => isset($channels["Zposition"]) ? $channels["Zposition"][$i] : null,
+                'Y_position' => isset($channels["Yposition"]) ? $channels["Yposition"][$i] : null,
+                'X_rotation' => isset($channels["Xrotation"]) ? $channels["Xrotation"][$i] : null,
+                'Y_rotation' => isset($channels["Yrotation"]) ? $channels["Yrotation"][$i] : null,
+                'Z_rotation' => isset($channels["Zrotation"]) ? $channels["Zrotation"][$i] : null,
                 "joint_ID" => $jointID,
             ];
             $sql = "INSERT INTO channels (X_position,Y_position,Z_position,X_rotation,Y_rotation,Z_rotation,joint_ID)

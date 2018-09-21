@@ -54,15 +54,6 @@ CREATE TABLE `files` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 
 --
--- Dumping data for table `files`
---
-
-INSERT INTO `files` (`ID`, `file_name`, `frames`, `frame_time`, `date`) VALUES
-(9, 'nowy.bvh', 926, 0.0333333, '2018-09-20 17:03:23');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `joints`
 --
 
@@ -76,12 +67,6 @@ CREATE TABLE `joints` (
   `file_ID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 
---
--- Dumping data for table `joints`
---
-
-INSERT INTO `joints` (`ID`, `name`, `offset_x`, `offset_y`, `offset_z`, `number_of_channels`, `file_ID`) VALUES
-(63, 'Hips', 47.861, 50.121, -306.004, 6, 9);
 
 --
 -- Indexes for dumped tables
