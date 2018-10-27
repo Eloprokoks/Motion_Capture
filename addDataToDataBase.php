@@ -1,8 +1,10 @@
 <?php
 require "database.php";
-
+require "messageconst.php";
+global $jointError, $channelError, $filesError;
 class Saver
 {
+
     private $database;
     private $frames;
 
@@ -10,14 +12,13 @@ class Saver
     {
         $this->database = connect();
 
-        echo "wywołano konstruktor";
     }
-    
+
     public function addChannelToDataBase($channels, $jointID, $i)
     {
         try {
 
-            $data = [
+            $data = [   
                 'X_position' => isset($channels["Xposition"]) ? $channels["Xposition"][$i] : null,
                 'Z_position' => isset($channels["Zposition"]) ? $channels["Zposition"][$i] : null,
                 'Y_position' => isset($channels["Yposition"]) ? $channels["Yposition"][$i] : null,
@@ -32,7 +33,7 @@ class Saver
             $stmt = $this->database->prepare($sql);
             $stmt->execute($data);
         } catch (PDOException $e) {
-            echo "Failed to get DB handle:s " . $e->getMessage() . "\n";
+            echo $channelError;
             exit;
         }
 
@@ -40,12 +41,14 @@ class Saver
     public function addJointsToDataBase($joints)
     {
         $fileID = $this->getFileID();
+        $ID= $this->getJointID();
         foreach ($joints as $joint) {
-            $this->addJointToDataBase($joint, $fileID);
-            for ($i = 0; $i < $this->frames; $i++) {
-                $this->addChannelToDataBase($joint->channels, $this->getJointID(), $i);
-                # code...
-            }
+            $ID+=1;
+            $this->addJointToDataBase($joint, $fileID, $ID);
+            // for ($i = 0; $i < $this->frames; $i++) {
+            //     $this->addChannelToDataBase(isset($joint->channels)?$joint->channels:null, $this->getJointID(), $i);
+                
+            // }
         }
 
     }
@@ -62,7 +65,7 @@ class Saver
             $stmt = $this->database->prepare($sql);
             $stmt->execute($data);
         } catch (PDOException $e) {
-            echo "Failed to get DB handle:s " . $e->getMessage() . "\n";
+            echo $filesError;
             exit;
         }
 
@@ -81,24 +84,57 @@ class Saver
         $jointID = $this->database->query($sql)->fetch()["ID"];
         return $jointID;
     }
-    public function addJointToDataBase($joint, $fileID)
+    public function addJointToDataBase($joint, $fileID,$ID)
     {
         try {
             $data = [
+                'ID' => $ID,
                 'name' => $joint->name,
                 'offset_x' => $joint->offsetX,
                 'offset_y' => $joint->offsetY,
                 'offset_z' => $joint->offsetZ,
-                'number_of_channels' => $joint->numberOfChannels,
+                'number_of_channels' => isset($joint->numberOfChannels) ? $joint->numberOfChannels : null,
                 "file_ID" => $fileID,
             ];
-            $sql = "INSERT INTO joints (name, offset_x, offset_y,offset_z,number_of_channels,file_ID) VALUES (:name, :offset_x, :offset_y,:offset_z,:number_of_channels,:file_ID)";
+            $sql = "INSERT INTO joints (ID, name, offset_x, offset_y,offset_z,number_of_channels,file_ID) VALUES (:ID, :name, :offset_x, :offset_y,:offset_z,:number_of_channels,:file_ID)";
 
             $stmt = $this->database->prepare($sql);
             $stmt->execute($data);
+            if (isset($joint->channels))
+            {
+                $this->nowa_funkcja($joint->channels, $ID);
+            
+            };
         } catch (PDOException $e) {
-            echo "Failed to get DB handle:s " . $e->getMessage() . "\n";
+            echo $e;
             exit;
         }
     }
+    function nowa_funkcja($channels, $ID)
+    { $values = "";
+        
+        for ($i = 0; $i < $this->frames; $i++) {
+            $data = [   
+                'X_position' => isset($channels["Xposition"]) ? $channels["Xposition"][$i] : "NULL",
+                'Z_position' => isset($channels["Zposition"]) ? $channels["Zposition"][$i] : "NULL",
+                'Y_position' => isset($channels["Yposition"]) ? $channels["Yposition"][$i] : "NULL",
+                'X_rotation' => isset($channels["Xrotation"]) ? $channels["Xrotation"][$i] : "NULL",
+                'Y_rotation' => isset($channels["Yrotation"]) ? $channels["Yrotation"][$i] : "NULL",
+                'Z_rotation' => isset($channels["Zrotation"]) ? $channels["Zrotation"][$i] : "NULL",
+                "joint_ID" => $ID,
+            ];
+              $values .="(".implode(", ",$data).")";
+              $values .= $i < $this->frames-1?",":"";
+            }
+            try {
+                $sql = "INSERT INTO channels (X_position,Y_position,Z_position,X_rotation,Y_rotation,Z_rotation,joint_ID)
+                VALUES ".$values;
+                $stmt = $this->database->prepare($sql);
+                $stmt->execute();
+            } catch (PDOException $e) {
+                echo $channelError;
+                exit;
+            }
+    }
 }
+

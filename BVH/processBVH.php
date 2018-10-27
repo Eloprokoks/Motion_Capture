@@ -3,26 +3,24 @@
 require "joint.php";
 require "BVHconsts.php";
 require "addDataToDataBase.php";
+require "messageconst.php";
 $joints = array(); //lista
 $framesNumber;
 $frameTimeNumber;
 function readBVH($file, $fileSize, $fileName)
 {
-    global $hierarchy, $root, $joints, $framesNumber, $frameTimeNumber;
+    global $hierarchy, $root, $joints, $framesNumber, $frameTimeNumber,$incorrectBVH;
     $arrayBVH = getBVHArray($file, $fileSize);
     $fileIsCorrect = checkHierarchy($arrayBVH) && areEqual($arrayBVH[0], $hierarchy) && areEqual($arrayBVH[1], $root);
     if ($fileIsCorrect) {
-// echo '<pre>';
-        //         print_r($arrayBVH);
-        //         echo '</pre>';;
+
         //start recursion, 2 = "Hips"
         $i = checkFile($arrayBVH, 2);
         $i = setFramesAndFrameTime($arrayBVH, $i);
-        // echo$framesNumber." ".$frameTimeNumber;
         fillJointsWithData($arrayBVH, $i);
-        echo '<pre>';
+        echo "<pre>";
         print_r($joints);
-        echo '</pre>';
+        echo "</pre>";
         $saver = new Saver();
         $saver->addFileToDataBase($fileName, $framesNumber, $frameTimeNumber);
         $saver->addJointsToDataBase($joints);
@@ -30,7 +28,7 @@ function readBVH($file, $fileSize, $fileName)
 
     }
    else {
-        echo "plik BVH jest niepoprawny";
+        echo $incorrectBVH;
     }
 
 }
@@ -72,10 +70,9 @@ function checkFile($arrayBVH, $i)
     // $fileIsCorrect = areEqual($arrayBVH[$i + 1], $braceLeft) && areEqual($arrayBVH[$i + 2], $offset);
 
     //trafiono na MOTION, $i-1 to pozycja słowa przed nazwą jointa
-    if (areEqual($arrayBVH[$i - 1], $motion)) {
-        echo "KONIEC TEJ STRUKTURY";
+    if (!areEqual($arrayBVH[$i - 1], $motion)) 
 
-    } else {
+    {
         // /$i += 2;
         // if ($fileIsCorrect) {
         $nextWord = $arrayBVH[$i - 1];
@@ -141,9 +138,9 @@ function setEnd($arrayBVH, $i)
 {
     global $site, $joints;
     $fileIsCorrect = areEqual($arrayBVH[$i + 1], $site);
-    $i += 1;
-    $newJoint = new Joint("End Site " . $i, $arrayBVH[$i + 3], $arrayBVH[$i + 4], $arrayBVH[$i + 5]);
-    $i += 5;
+    $i += 2;
+    $newJoint = new BaseJoint("End Site " . $i, $arrayBVH[$i + 3], $arrayBVH[$i + 4], $arrayBVH[$i + 5]);
+    $i += 4;
     array_push($joints, $newJoint);
     return $i;
 }
@@ -168,11 +165,15 @@ function fillJointsWithData($arrayBVH, $i)
     $l = 0; // licznik po channelach
     for ($j = $i; $j < $arraySize; $j += $l) {
         $l = 0;
-        foreach ($joints[$k % count($joints)]->channels as $key => $channel) {
-            if (isset($arrayBVH[$j + $l]) && $arrayBVH[$j + $l]) {
-                array_push($joints[$k % count($joints)]->channels[$key], $arrayBVH[$j + $l]);
+        if(isset($joints[$k % count($joints)]->channels)) {
+
+            foreach ($joints[$k % count($joints)]->channels as $key => $channel) {
+                if (isset($arrayBVH[$j + $l])) {
+                // if (isset($arrayBVH[$j + $l]) && $arrayBVH[$j + $l]) {  //po coś to było nie wiem po co 
+                    array_push($joints[$k % count($joints)]->channels[$key], $arrayBVH[$j + $l]);
+                }
+                $l++;
             }
-            $l++;
         }
         $k++;
     }
