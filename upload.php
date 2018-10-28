@@ -12,5 +12,18 @@ function readFileFromForm()
 }
 //6 wywołanie funkcji readFileFromForm, z pliku, zamknięcie
 [$file, $fileSize, $fileName] = readFileFromForm();
-readBVH($file, $fileSize, $fileName);
+
+$parser=new Parser($file, $fileSize);
+[$joints,$framesNumber, $frameTimeNumber]=$parser->readBVH();
+
+$saver = new Saver();
+$saver->addFileToDataBase(
+    $fileName,
+    $framesNumber,
+    $frameTimeNumber
+);
+
+$saver->addJointsToDataBase($joints);
+
 fclose($file);
+

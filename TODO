@@ -1,14 +1,16 @@
 czy musi byc zachowana hierarchia w bazie - TAK
 sprawdzenie poprawnosci pliku -
 
-zrobic petle zeby wrzucalo jako paczki danych, nie rzad - wrzucenie wielu wierszy naraz, dlugo sie wrzuca, roblem z czasem
-czy wrzucone pliki bvh mają byc zapisywane na serwerze?
+//zrobic petle zeby wrzucalo jako paczki danych, nie rzad - wrzucenie wielu wierszy naraz, dlugo sie wrzuca, roblem z czasem
+//czy wrzucone pliki bvh mają byc zapisywane na serwerze?    zapisywany jest sam tekst 
 inne formaty  (FBX)- potrzebne? 
-czy można obejrzeć prace inżynierskie z poprzednich lat
+czy można obejrzeć prace inżynierskie z poprzednich lat vimed.pwr.edu.pl 
 
 serwer politechnika 
 format fbx, dodatkowo jak da radę
 
 zapisać bazę na kompie w pracowni albo na serwerze i opisać w pracy  
 około 30 stron, praca inżynierska
-vimed.pwr.edu.pl 
+
+W PHP MY ADMIN w tabeli Joint dodaj nowe pole na koncu typu INT, (referencja do innej tabeli) 
+plik który dodaje do bazy, zmodyfikować jedną funkcję,ta która dodaje Jointy, tamgdzie imieoffsety, dodać parent

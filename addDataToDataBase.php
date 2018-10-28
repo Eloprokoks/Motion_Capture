@@ -1,6 +1,5 @@
 <?php
 require "database.php";
-require "messageconst.php";
 global $jointError, $channelError, $filesError;
 class Saver
 {
@@ -10,7 +9,7 @@ class Saver
 
     public function __construct()
     {
-        $this->database = connect();
+        $this->database = connectToDataBase();
 
     }
 
@@ -86,7 +85,7 @@ class Saver
     }
     public function addJointToDataBase($joint, $fileID,$ID)
     {
-        try {
+        try { // TODO
             $data = [
                 'ID' => $ID,
                 'name' => $joint->name,

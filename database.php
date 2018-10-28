@@ -1,18 +1,21 @@
 <?php
-// 3 ustanowienie połączenia z bazą używając klasy PDO
-function connect()
+/**
+ * Funkcja łącząca się z bazą danych za pomocą biblioteki PDO
+ * @return PDO - baza danych
+ */
+function connectToDataBase()
 {
     require "config.php";
-    require "messageconst.php";
-    global $noConnection;
-    // include
-     //PDO object
     try {
-        $database = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
-        $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $database;
-    } catch (PDOException $e) {
-        print $noConnection;
+        $database = new PDO(
+            "mysql:host=" . $host . ";dbname=" . $dbname,
+            $user,
+            $pass
+        );
+        $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // wyswietla błędy jeśli się pojawią
+        return $database;  
+    } catch (PDOException $e) {  // wychwytuje błędy i drukuje 
+        print($e);
         die();
     }
 }
