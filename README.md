@@ -1,2 +1,2 @@
 # Motion_Capture
-#Coś pięknego i niedrogo
+# Baza danych i odczyt plików w formacie .bvh
