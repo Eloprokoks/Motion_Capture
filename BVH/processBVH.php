@@ -9,15 +9,15 @@ require "addDataToDataBase.php";
  */
 class Parser
 {
-    private $joints = array();
-    private $framesNumber;
-    private $frameTimeNumber;
-    private $parents = array();
-    private $parentHierarchy = 0;
-    private $file;
-    private $fileSize;
-    private $fileIsCorrect = true;
-    private $arrayBVH = array();
+    private $joints = array();      // tablica stawów
+    private $framesNumber;          // ilość klatek
+    private $frameTimeNumber;       // czas trwania klatki
+    private $parents = array();     // tablica rodziców
+    private $parentHierarchy = 0;   // hierarchia rodziców
+    private $file;                  // nazwa pliku
+    private $fileSize;              // rozmiar pliku
+    private $fileIsCorrect = true;  // sprawdzenie poprawności pliku
+    private $arrayBVH = array();    // plik bvh umieszczony w tablicy
 
     /**
      * Konstruktor
@@ -32,14 +32,15 @@ class Parser
     }
 
     /**
-     * Funkcja główna, wywołuje resztę funkcji
+     *0/ Funkcja główna, wywołuje resztę funkcji
      */
     public function readBVH()
     {
         global $HIERARCHY, $ROOT;
 
+        // ustawienie pliku bvh w tablicy 
         $this->arrayBVH = $this->getBVHArray($this->file, $this->fileSize);
-
+        
         $this->fileIsCorrect = $this->checkHierarchy($this->arrayBVH)
         && $this->areEqual($this->arrayBVH[0], $HIERARCHY)
         && $this->areEqual($this->arrayBVH[1], $ROOT);
@@ -54,43 +55,43 @@ class Parser
     }
 
     /**
-     * Funkcja sprawdzająca poprawność pliku na podstawie chierarchii stawów
+     * 3/ Funkcja sprawdzająca poprawność pliku na podstawie hierarchii stawów
      */
     private function checkHierarchy()
     {
         global $BRACE_LEFT, $BRACE_RIGHT;
 
-        foreach ($this->arrayBVH as $arrayElement) {
+        foreach ($this->arrayBVH as $arrayElement) {  //obecnie sprawdzany element w tablicy arrayBVH nazywa się arrayElement
             $hierarchy = 0;
-            if ($this->areEqual($arrayElement, $BRACE_LEFT)) {
+            if ($this->areEqual($arrayElement, $BRACE_LEFT)) {   //jeżeli obecny element będzie {, zwróć prawdę
                 $hierarchy++;
             } elseif ($this->areEqual($arrayElement, $BRACE_RIGHT)) {
                 $hierarchy--;
             }
         }
-        return $hierarchy == 0;
+        return $hierarchy == 0;   
     }
 
     /**
-     * Funkcja czyta plik i tworzy listę
+     * 1/ Funkcja czyta plik i tworzy listę
      */
     private function getBVHArray()
     {
-        $stringContent = fread($this->file, $this->fileSize);
-        $stringNoWS = preg_replace('/\s+/', '#', $stringContent); // tekst bez białych znaków (WS)
-        return explode("#", $stringNoWS);
+        $stringContent = fread($this->file, $this->fileSize);     //odczytuje plik do podanego rozmiaru, zwraca łancuch znaków
+        $stringNoWS = preg_replace('/\s+/', '#', $stringContent); // zamienia białe znaki na #
+        return explode("#", $stringNoWS);                         // explode dzieli stringa i przypisuje każdą kolejną wartość do nowego indeksu w tablicy  
     }
 
     /**
-     * Funkcja porównująca dwa słowa
+     * 2/ Funkcja porównująca dwa słowa
      */
-    private static function areEqual($arrayElement, $itemCompared)
+    private function areEqual($arrayElement, $itemCompared)
     {
-        return strcmp($arrayElement, $itemCompared) == 0;
+        return strcmp($arrayElement, $itemCompared) == 0;  //zwraca true jeśli oba elementy równe 
     }
 
     /**
-     * Rekursywna funkcja chodząca po stworzonej liście i tworzy Jointy
+     *  Rekursywna funkcja chodząca po stworzonej liście i tworzy Jointy
      */
     private function checkFile($i)
     {
@@ -115,7 +116,7 @@ class Parser
                 );
 
                 $i += 5; // przesunięcie wskaźnika
-
+                // MUSZE LEPIEJ OGARNAC TO CO TU SIE DZIEJE
                 //sprawdzamy czy kolejne słowo to channel lub czy jest "}"
                 if ($this->areEqual($this->arrayBVH[$i + 1], $CHANNELS)) {
                     $jointWithChannels = $this->checkChannels($newJoint, $i);
@@ -134,7 +135,7 @@ class Parser
     }
 
     /**
-     * przesunięcie wskaźnika o tyle ile jest "}"
+     * 4/ przesunięcie wskaźnika o tyle ile jest "}"
      */
     private function checkBraceRight($braceRight, $i)
     {
@@ -148,14 +149,14 @@ class Parser
     }
 
     /**
-     * Funkcja sprawdza cyfrę przed channelami, inicjuje listę channeli obiektu Joint nowymi pustymi listami
+     * 5/ Funkcja sprawdza cyfrę przed channelami, inicjuje listę channeli obiektu Joint nowymi pustymi listami
      */
     private function checkChannels($newJoint, $i)
     {
-        $numberOfChannels = (int) $this->arrayBVH[$i + 2]; // rzutowanie na inta ze stringa
-        $newJoint->setNumberOfChannels($numberOfChannels);
+        $numberOfChannels = (int) $this->arrayBVH[$i + 2]; // rzutowanie na inta ze stringa  //
+        $newJoint->setNumberOfChannels($numberOfChannels);    //wywołanie metody (funkcji wewnątrz klasy) ustawiającej numer channeli
         for ($j = 0; $j < $numberOfChannels; $j++) {
-            $newJoint->channels[$this->arrayBVH[3 + $i + $j]] = array();
+            $newJoint->channels[$this->arrayBVH[3 + $i + $j]] = array();  
 
         }
         return $newJoint;
@@ -163,7 +164,7 @@ class Parser
     }
 
     /**
-     * Funkcja przesuwa wskaźnik o ilość "}"  i sprawdza czy jest End site
+     * 6/ Funkcja przesuwa wskaźnik o ilość "}"  i sprawdza czy jest End site
      */
     private function setBraceRight($i)
     {
@@ -201,17 +202,17 @@ class Parser
     }
 
     /**
-     * funkcja czyta ilość klatek i czas trwania jednej klatkis
+     * 7/ funkcja czyta ilość klatek i czas trwania jednej klatkis
      */
     private function setFramesAndFrameTime($i)
     {
         global $FRAMES, $FRAME, $TIME;
         $this->fileIsCorrect = $this->areEqual($this->arrayBVH[$i], $FRAMES);
-        $this->framesNumber = (int) $this->arrayBVH[$i + 1];
+        $this->framesNumber = (int) $this->arrayBVH[$i + 1];  // rzutowanie stringa na inta
         $this->fileIsCorrect =
         $this->areEqual($this->arrayBVH[$i + 2], $FRAME)
         && $this->areEqual($this->arrayBVH[$i + 3], $TIME);
-        $this->frameTimeNumber = (float) $this->arrayBVH[$i + 4];
+        $this->frameTimeNumber = (float) $this->arrayBVH[$i + 4];  // rzutowanie stringa na floata bo frame time wyglada na przykład tak 0.03333
         $i += 4;
         return $i;
     }
@@ -220,8 +221,8 @@ class Parser
      */
     private function fillJointsWithData($i)
     {
-        $i += 1;
-        $arraySize = count($this->arrayBVH);
+        $i += 1;     // dodanie jeden bo znajdowaliśmy się na wartości frame time
+        $arraySize = count($this->arrayBVH);   //zlicza ilość słów w tablicy 
 
         $k = 0; //pozycja w tablicy liczona od 0 tam gdzie zaczynają się numery
         $l = 0; // licznik po channelach

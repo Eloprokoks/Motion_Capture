@@ -33,7 +33,8 @@ class Joint extends BaseJoint
     public $numberOfChannels = 0;
     public $channels = array(); //lista  $channels=array() ----> $channels=[]
 
-    public function setNumberOfChannels($newNumberOfChannels)
+    // funkcja ustawiająca ilość kanałów
+    public function setNumberOfChannels($newNumberOfChannels)    
     {
         $this->numberOfChannels = $newNumberOfChannels;
     }

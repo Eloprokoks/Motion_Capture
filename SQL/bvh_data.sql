@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 20, 2018 at 05:09 PM
+-- Generation Time: Nov 10, 2018 at 07:57 PM
 -- Server version: 10.1.35-MariaDB
 -- PHP Version: 7.2.9
 
@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `bvh_data`
+-- Database: `bvh_data2`
 --
 
 -- --------------------------------------------------------
@@ -53,6 +53,8 @@ CREATE TABLE `files` (
   `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `joints`
 --
@@ -64,9 +66,9 @@ CREATE TABLE `joints` (
   `offset_y` float NOT NULL,
   `offset_z` float NOT NULL,
   `number_of_channels` int(2) DEFAULT NULL,
-  `file_ID` int(11) NOT NULL
+  `file_ID` int(11) NOT NULL,
+  `parent` varchar(11) COLLATE utf8mb4_polish_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
-
 
 --
 -- Indexes for dumped tables
@@ -76,7 +78,8 @@ CREATE TABLE `joints` (
 -- Indexes for table `channels`
 --
 ALTER TABLE `channels`
-  ADD PRIMARY KEY (`ID`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `channels_ibfk_1` (`joint_ID`);
 
 --
 -- Indexes for table `files`
@@ -88,7 +91,8 @@ ALTER TABLE `files`
 -- Indexes for table `joints`
 --
 ALTER TABLE `joints`
-  ADD PRIMARY KEY (`ID`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `joints_ibfk_1` (`file_ID`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -98,19 +102,19 @@ ALTER TABLE `joints`
 -- AUTO_INCREMENT for table `channels`
 --
 ALTER TABLE `channels`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1652;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `files`
 --
 ALTER TABLE `files`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `joints`
 --
 ALTER TABLE `joints`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables

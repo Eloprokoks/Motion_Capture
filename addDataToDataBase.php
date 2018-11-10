@@ -94,8 +94,9 @@ class Saver
                 'offset_z' => $joint->offsetZ,
                 'number_of_channels' => isset($joint->numberOfChannels) ? $joint->numberOfChannels : null,
                 "file_ID" => $fileID,
+                'parent' => $joint->parent,
             ];
-            $sql = "INSERT INTO joints (ID, name, offset_x, offset_y,offset_z,number_of_channels,file_ID) VALUES (:ID, :name, :offset_x, :offset_y,:offset_z,:number_of_channels,:file_ID)";
+            $sql = "INSERT INTO joints (ID, name, offset_x, offset_y,offset_z,number_of_channels,file_ID,parent) VALUES (:ID, :name, :offset_x, :offset_y,:offset_z,:number_of_channels,:file_ID,:parent)";
 
             $stmt = $this->database->prepare($sql);
             $stmt->execute($data);
